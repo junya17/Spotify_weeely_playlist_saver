@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Playlist Saver</title>
+</head>
+<body>
+    <h1>Spotify Playlist Saver</h1>
+    <button onclick="saveDiscoverWeekly()">Save Discover Weekly</button>
+    <button onclick="getPlaylists()">Get My Playlists</button>
+    
+    <div id="message"></div>
+    <div id="playlists"></div>
+
+    <script>
+    function saveDiscoverWeekly() {
+        fetch('{{ url_for("save_discover_weekly") }}', {
+            method: 'POST',
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('message').innerText = data.error;
+            } else {
+                document.getElementById('message').innerText = data.message;
+                let songsHtml = '<ul>';
+                data.added_songs.forEach(song => {
+                    songsHtml += `<li>${song.name} - ${song.artists.join(', ')}</li>`;
+                });
+                songsHtml += '</ul>';
+                document.getElementById('playlists').innerHTML = songsHtml;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('message').innerText = 'An error occurred. Please try again.';
+        });
+    }
+
+    function getPlaylists() {
+        fetch('{{ url_for("get_playlists") }}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('message').innerText = data.error;
+                } else {
+                    let playlistsHtml = '<ul>';
+                    data.forEach(playlist => {
+                        playlistsHtml += `<li>${playlist.name}</li>`;
+                    });
+                    playlistsHtml += '</ul>';
+                    document.getElementById('playlists').innerHTML = playlistsHtml;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('message').innerText = 'Error fetching playlists. Please try again.';
+            });
+    }
+    </script>
+</body>
+</html>
